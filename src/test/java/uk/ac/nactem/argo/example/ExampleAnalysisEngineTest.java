@@ -1,0 +1,63 @@
+package uk.ac.nactem.argo.example;
+
+import org.apache.uima.UIMAException;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.resource.ResourceInitializationException;
+import org.junit.Before;
+import org.junit.Test;
+import org.u_compare.shared.semantic.Place;
+
+import uk.ac.nactem.argo.example.ExampleAnalysisEngine;
+
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
+import static org.apache.uima.fit.factory.JCasFactory.createJCas;
+import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
+import static org.apache.uima.fit.util.JCasUtil.select;
+
+/**
+ * Sample tests for the example component. Remove these and add new tests.
+ */
+public class ExampleAnalysisEngineTest {
+
+	AnalysisEngineDescription component;
+
+	@Before
+	public void setup() throws ResourceInitializationException {
+		component = createEngineDescription(ExampleAnalysisEngine.class);
+	}
+
+	@Test
+	public void noAnnotations() throws UIMAException {
+		JCas jcas = runComponent("Some text not containing any recognisable cities.", true);
+		assert (select(jcas, Place.class).size() == 0);
+	}
+
+	@Test
+	public void noAnnotationsCaseSensitive() throws UIMAException {
+		JCas jcas = runComponent("london won't produce an annotation as it doesn't begin with a capital letter.", true);
+		assert (select(jcas, Place.class).size() == 0);
+	}
+
+	@Test
+	public void singleAnnotationCaseInsensitive() throws UIMAException {
+		JCas jcas = runComponent("london will produce an annotation as the component will ignore the case of the text.",
+				false);
+		assert (select(jcas, Place.class).size() == 1);
+	}
+
+	@Test
+	public void singleAnnotationCaseSensitive() throws UIMAException {
+		JCas jcas = runComponent("An annotation will be created for New York, although paris will be ignored.", true);
+		assert (select(jcas, Place.class).size() == 1);
+	}
+
+	private JCas runComponent(String text, boolean caseSensitive) throws UIMAException {
+		component.getAnalysisEngineMetaData().getConfigurationParameterSettings()
+				.setParameterValue(ExampleAnalysisEngine.PARAM_CASE_SENSITIVE, caseSensitive);
+		JCas jcas = createJCas();
+		jcas.setDocumentText(text);
+		runPipeline(jcas, component);
+		return jcas;
+	}
+}
