@@ -20,7 +20,7 @@ import org.u_compare.shared.semantic.Place;
  */
 @TypeCapability(inputs = {}, outputs = { "org.u_compare.shared.semantic.Place" }) // Input and output annotation types
 @LanguageCapability({ "en" }) // Languages supported by this component
-@ResourceMetaData(name="Component Name")
+@ResourceMetaData(name="Argo Example Analysis Engine")
 public class ExampleAnalysisEngine extends JCasAnnotator_ImplBase {
 
 	private static final String[] CITIES = { "London", "Paris", "New York", "Shanghai", "Bangkok", "Moscow", "Madrid" };
